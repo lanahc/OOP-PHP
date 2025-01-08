@@ -338,12 +338,7 @@ class SigninForm {
     <h2>Sign In</h2>
 
     <?php
-    $fncs = new Fncs(); 
-    $errorMessage = $fncs->getMsg('msg'); 
-    if (!empty($errorMessage)) {
-        echo $errorMessage; 
-    }
-
+    
     if (isset($_POST['submit'])) {
         $username = $_POST['username'];
         $password = $_POST['password'];
