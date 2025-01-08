@@ -8,7 +8,6 @@ if (isset($_GET['form'])) {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
