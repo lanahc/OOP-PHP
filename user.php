@@ -219,7 +219,7 @@ class Form {
 <body>
 
     <div class="container">
-        <h2>Signup Form</h2>
+        <h2>Form</h2>
         <?php
         if (isset($_POST['submit'])) {
     $name = $_POST['name'] ?? '';
