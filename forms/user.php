@@ -294,7 +294,6 @@ class Form {
 
 </body>
 </html>
-
 <?php
 class SigninForm {
     private $username;
@@ -326,6 +325,69 @@ class SigninForm {
     }
 }
 ?>
+
+**Signin.php:**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <?php require_once 'functions.php'; // Include functions.php ?>
+    <?php require_once 'SigninForm.php'; // Include SigninForm class ?>
+</head>
+<body>
+
+    <h2>Sign In</h2>
+
+    <?php
+    $fncs = new Fncs(); 
+    $errorMessage = $fncs->getMsg('msg'); 
+    if (!empty($errorMessage)) {
+        echo $errorMessage; 
+    }
+
+    if (isset($_POST['submit'])) {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        $signinForm = new SigninForm($username, $password);
+
+        if ($signinForm->validate()) {
+            // Authenticate user (e.g., check credentials against database)
+            // If successful:
+            $_SESSION["user_id"] = 123; // Replace with actual user ID
+            header("Location: profile.php"); 
+            exit();
+
+        } else {
+            $errors = $signinForm->getErrors();
+        }
+    }
+    ?>
+
+    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter Username" required>
+            <?php if (isset($errors['username_empty'])) : ?>
+                <span class="error"><?php echo $errors['username_empty']; ?></span>
+            <?php endif; ?>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            <?php if (isset($errors['password_empty'])) : ?>
+                <span class="error"><?php echo $errors['password_empty']; ?></span>
+            <?php endif; ?>
+        </div>
+        <button type="submit" name="submit">Sign In</button>
+    </form>
+
+</body>
+</html>
 
 <?php
 
