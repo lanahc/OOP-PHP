@@ -31,99 +31,54 @@ class users{
                 </div>
                 <button type="submit" name="signup" class="btn btn-primary">Submit</button>
                      
-<?php
-            }
-            
-         }
-?>    
-    
-
-    <?php    
-
-class TwoFactorAuthForm {
-
-    private $otp;
-    private $errors = [];
-
-    public function __construct($otp) {
-        $this->otp = $otp;
-    }
-
-    public function validate() {
-        // Check if OTP is empty
-        if (empty($this->otp)) {
-            $this->errors['otp_empty'] = "OTP is required.";
-        } 
-
-        // Check if OTP contains only digits
-        if (!preg_match('/^[0-9]+$/', $this->otp)) {
-            $this->errors['otp_invalid'] = "OTP should contain only digits.";
-        }
-
-        // Check if OTP has the expected length (e.g., 6 digits)
-        if (strlen($this->otp) != 6) {
-            $this->errors['otp_length'] = "OTP should be 6 digits long.";
-        }
-
-        return empty($this->errors);
-    }
-
-    public function getErrors() {
-        return $this->errors;
-    }
-
+ <?php    
 }
 
+    public function verification_otp_form($ObjGlob) {
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two-Factor Authentication</title>
-</head>
-<body>
-
-    <div class="container"> 
-        <h2>Two-Factor Authentication</h2>
+    <div class="h-100 p-5 text-bg-dark rounded-3">
+        <h2>Verify OTP</h2>
         <?php
-        if (isset($_POST['submit'])) {
-            $otp = $_POST['otp'] ?? '';
-
-            $twoFactorForm = new TwoFactorAuthForm($otp);
-
-            if ($twoFactorForm->validate()) {
-                // Handle successful OTP verification (e.g., redirect to the next page)
-                // ...
-            } else {
-                $errors = $twoFactorForm->getErrors();
-            }
-        }
+        print $ObjGlob->getMsg('msg');
+        $err = $ObjGlob->getMsg('errors');
         ?>
-        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-            <div class="form-group">
-                <label for="otp">Enter OTP:</label>
-                <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter your OTP" required>
-                <?php if (isset($errors['otp_empty'])) : ?>
-                    <span class="error"><?php echo $errors['otp_empty']; ?></span>
-                <?php endif; ?>
-                <?php if (isset($errors['otp_invalid'])) : ?>
-                    <span class="error"><?php echo $errors['otp_invalid']; ?></span>
-                <?php endif; ?>
-                <?php if (isset($errors['otp_length'])) : ?>
-                    <span class="error"><?php echo $errors['otp_length']; ?></span>
-                <?php endif; ?>
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+            <div class="mb-3">
+                <label for="otp" class="form-label">Enter OTP:</label>
+                <input type="text" name="otp" class="form-control form-control-lg" id="otp" placeholder="Enter OTP" required>
+                <?php print (isset($err['otp_invalid'])) ? "<span class='invalid'>" . $err['otp_invalid'] . "</span>" : ''; ?>
             </div>
-            <button type="submit" name="submit" class="btn btn-primary">Verify</button>
+            <button type="submit" name="verify_otp" class="btn btn-primary">Verify</button>
         </form>
     </div>
+    <?php
+    }
 
-</body>
-</html>
-
-<?php
-
+    public function sign_in_form($ObjGlob) {
+?>
+        <div class="h-100 p-5 text-bg-dark rounded-3">
+            <h2>Sign In</h2>
+            <?php
+            print $ObjGlob->getMsg('msg');
+            $err = $ObjGlob->getMsg('errors');
+            ?>
+            <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" name="username" class="form-control form-control-lg" id="username" placeholder="Enter Username" required>
+                    <?php print (isset($err['username_invalid'])) ? "<span class='invalid'>" . $err['username_invalid'] . "</span>" : ''; ?>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" name="password" class="form-control form-control-lg" id="password" placeholder="Enter Password" required>
+                    <?php print (isset($err['password_invalid'])) ? "<span class='invalid'>" . $err['password_invalid'] . "</span>" : ''; ?>
+                </div>
+                <button type="submit" name="login" class="btn btn-primary">Login</button>
+            </form>
+    </div>
+    <?php
+}
+}
 class Form {
 
     private $name;
@@ -267,91 +222,7 @@ class Form {
 
 </body>
 </html>
-<?php
-class SigninForm {
-    private $username;
-    private $password;
-    private $errors = [];
 
-    public function __construct($username, $password) {
-        $this->username = $username;
-        $this->password = $password;
-    }
-
-    public function validate() {
-        // Basic username and password validation
-        if (empty($this->username)) {
-            $this->errors['username_empty'] = "Username is required.";
-        }
-        if (empty($this->password)) {
-            $this->errors['password_empty'] = "Password is required.";
-        }
-
-        // You would typically add more robust validation here, 
-        // such as checking for password strength, length, etc.
-
-        return empty($this->errors);
-    }
-
-    public function getErrors() {
-        return $this->errors;
-    }
-}
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
-    
-</head>
-<body>
-
-    <h2>Sign In</h2>
-
-    <?php
-    
-    if (isset($_POST['submit'])) {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-
-        $signinForm = new SigninForm($username, $password);
-
-        if ($signinForm->validate()) {
-            // Authenticate user (e.g., check credentials against database)
-            // If successful:
-            $_SESSION["user_id"] = 123; // Replace with actual user ID
-            header("Location: profile.php"); 
-            exit();
-
-        } else {
-            $errors = $signinForm->getErrors();
-        }
-    }
-    ?>
-
-    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Enter Username" required>
-            <?php if (isset($errors['username_empty'])) : ?>
-                <span class="error"><?php echo $errors['username_empty']; ?></span>
-            <?php endif; ?>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter Password" required>
-            <?php if (isset($errors['password_empty'])) : ?>
-                <span class="error"><?php echo $errors['password_empty']; ?></span>
-            <?php endif; ?>
-        </div>
-        <button type="submit" name="submit">Sign In</button>
-    </form>
-
-</body>
-</html>
 
 <?php
 
