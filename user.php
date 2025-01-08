@@ -65,7 +65,89 @@ if (isset($_GET['form'])) {
             </div>
         </div>
     </div>
+    <?php
 
+class TwoFactorAuthForm {
+
+    private $otp;
+    private $errors = [];
+
+    public function __construct($otp) {
+        $this->otp = $otp;
+    }
+
+    public function validate() {
+        // Check if OTP is empty
+        if (empty($this->otp)) {
+            $this->errors['otp_empty'] = "OTP is required.";
+        } 
+
+        // Check if OTP contains only digits
+        if (!preg_match('/^[0-9]+$/', $this->otp)) {
+            $this->errors['otp_invalid'] = "OTP should contain only digits.";
+        }
+
+        // Check if OTP has the expected length (e.g., 6 digits)
+        if (strlen($this->otp) != 6) {
+            $this->errors['otp_length'] = "OTP should be 6 digits long.";
+        }
+
+        return empty($this->errors);
+    }
+
+    public function getErrors() {
+        return $this->errors;
+    }
+
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication</title>
+</head>
+<body>
+
+    <div class="container"> 
+        <h2>Two-Factor Authentication</h2>
+        <?php
+        if (isset($_POST['submit'])) {
+            $otp = $_POST['otp'];
+
+            $twoFactorForm = new TwoFactorAuthForm($otp);
+
+            if ($twoFactorForm->validate()) {
+                // Handle successful OTP verification (e.g., redirect to the next page)
+                // ...
+            } else {
+                $errors = $twoFactorForm->getErrors();
+            }
+        }
+        ?>
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <div class="form-group">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter your OTP" required>
+                <?php if (isset($errors['otp_empty'])) : ?>
+                    <span class="error"><?php echo $errors['otp_empty']; ?></span>
+                <?php endif; ?>
+                <?php if (isset($errors['otp_invalid'])) : ?>
+                    <span class="error"><?php echo $errors['otp_invalid']; ?></span>
+                <?php endif; ?>
+                <?php if (isset($errors['otp_length'])) : ?>
+                    <span class="error"><?php echo $errors['otp_length']; ?></span>
+                <?php endif; ?>
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary">Verify</button>
+        </form>
+    </div>
+
+</body>
+</html>
 
 </body>
 </html>
