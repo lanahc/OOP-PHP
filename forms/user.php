@@ -1,6 +1,6 @@
 <?php
 class users{
-    public function sign_up_form($ObjGlob){
+    public function sign_up_form($conn, $ObjGlob, $ObjSendMail){
 ?> 
      div class="h-100 p-5 text-bg-dark rounded-3">
     <h2>Sign Up</h2>
@@ -33,7 +33,7 @@ class users{
  <?php    
 }
 
-    public function verification_otp_form($ObjGlob) {
+    public function verification_otp_form($conn, $ObjGlob, $ObjSendMail) {
 ?>
     <div class="h-100 p-5 text-bg-dark rounded-3">
         <h2>Verify OTP</h2>
@@ -54,7 +54,7 @@ class users{
     <?php
     }
 
-    public function sign_in_form($ObjGlob) {
+    public function sign_in_form($conn, $ObjGlob, $ObjSendMail) {
 ?>
         <div class="h-100 p-5 text-bg-dark rounded-3">
             <h2>Sign In</h2>
@@ -78,7 +78,7 @@ class users{
     </div>
     <?php
 }
-    public function main_form($ObjGlob) {
+    public function main_form($conn, $ObjGlob, $ObjSendMail) {
 ?>
         <div class="h-100 p-5 text-bg-dark rounded-3">
             <h2>Welcome</h2>
