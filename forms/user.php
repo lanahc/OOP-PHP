@@ -294,5 +294,37 @@ class Form {
 
 </body>
 </html>
+// SigninForm.php
+<?php
+class SigninForm {
+    private $username;
+    private $password;
+    private $errors = [];
+
+    public function __construct($username, $password) {
+        $this->username = $username;
+        $this->password = $password;
+    }
+
+    public function validate() {
+        // Basic username and password validation
+        if (empty($this->username)) {
+            $this->errors['username_empty'] = "Username is required.";
+        }
+        if (empty($this->password)) {
+            $this->errors['password_empty'] = "Password is required.";
+        }
+
+        // You would typically add more robust validation here, 
+        // such as checking for password strength, length, etc.
+
+        return empty($this->errors);
+    }
+
+    public function getErrors() {
+        return $this->errors;
+    }
+}
+?>
 </body>
 </html>
