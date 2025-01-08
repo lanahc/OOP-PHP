@@ -1,4 +1,3 @@
-// users.php
 <?php
 class users{
     public function sign_up_form($ObjGlob){
