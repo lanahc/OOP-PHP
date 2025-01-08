@@ -5,7 +5,7 @@
 /otp.html
 /signup.html
 /two_fa.html
-/user.php
+#/user.php
 /userr.php
 /verify_otp.php
 /welcome.php
