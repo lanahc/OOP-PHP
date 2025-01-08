@@ -4,18 +4,6 @@
 
 session_start();
 
-// Database connection (replace with your actual credentials)
-$servername = "localhost";
-$username = "root";
-$password = " ";
-$dbname = "oop";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 if (isset($_POST['otp'])) {
     $enteredOtp = $_POST['otp'];
 
@@ -36,6 +24,6 @@ if (isset($_POST['otp'])) {
     }
 }
 
-$conn->close();
+
 
 ?>
