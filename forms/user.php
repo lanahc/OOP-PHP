@@ -325,9 +325,6 @@ class SigninForm {
 }
 ?>
 
-**Signin.php:**
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
