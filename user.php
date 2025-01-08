@@ -116,7 +116,7 @@ class TwoFactorAuthForm {
         <h2>Two-Factor Authentication</h2>
         <?php
         if (isset($_POST['submit'])) {
-            $otp = $_POST['otp'];
+            $otp = $_POST['otp'] ?? '';
 
             $twoFactorForm = new TwoFactorAuthForm($otp);
 
