@@ -228,7 +228,7 @@ class Form {
             $address = $_POST['address'];
             $gender = $_POST['gender'];
 
-            $form = new SignupForm($name, $email, $phone, $address, $gender);
+            $form = new Form($name, $email, $phone, $address, $gender);
 
             if ($form->validate()) {
                 // Handle successful signup (e.g., redirect to welcome page)
