@@ -149,5 +149,151 @@ class TwoFactorAuthForm {
 </body>
 </html>
 
+<?php
+
+class Form {
+
+    private $name;
+    private $email;
+    private $phone;
+    private $address;
+    private $gender;
+    private $errors = [];
+
+    public function __construct($name, $email, $phone, $address, $gender) {
+        $this->name = $name;
+        $this->email = $email;
+        $this->phone = $phone;
+        $this->address = $address;
+        $this->gender = $gender;
+    }
+
+    public function validate() {
+        // Name validation
+        if (empty($this->name)) {
+            $this->errors['name_empty'] = "Name is required.";
+        } 
+
+        // Email validation
+        if (empty($this->email)) {
+            $this->errors['email_empty'] = "Email is required.";
+        } elseif (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            $this->errors['email_invalid'] = "Invalid email format.";
+        }
+
+        // Phone validation
+        if (empty($this->phone)) {
+            $this->errors['phone_empty'] = "Phone number is required.";
+        } elseif (!preg_match('/^[0-9]{10}$/', $this->phone)) { 
+            $this->errors['phone_invalid'] = "Invalid phone number format. Please enter 10 digits.";
+        }
+
+        // Address validation
+        if (empty($this->address)) {
+            $this->errors['address_empty'] = "Address is required.";
+        }
+
+        // Gender validation
+        if (empty($this->gender)) {
+            $this->errors['gender_empty'] = "Gender is required.";
+        }
+
+        return empty($this->errors);
+    }
+
+    public function getErrors() {
+        return $this->errors;
+    }
+
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Form</title>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Signup Form</h2>
+        <?php
+        if (isset($_POST['submit'])) {
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+            $address = $_POST['address'];
+            $gender = $_POST['gender'];
+
+            $form = new SignupForm($name, $email, $phone, $address, $gender);
+
+            if ($form->validate()) {
+                // Handle successful signup (e.g., redirect to welcome page)
+                // ...
+            } else {
+                $errors = $form->getErrors();
+            }
+        }
+        ?>
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
+                <?php if (isset($errors['name_empty'])) : ?>
+                    <span class="error"><?php echo $errors['name_empty']; ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                <?php if (isset($errors['email_empty'])) : ?>
+                    <span class="error"><?php echo $errors['email_empty']; ?></span>
+                <?php elseif (isset($errors['email_invalid'])) : ?>
+                    <span class="error"><?php echo $errors['email_invalid']; ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required>
+                <?php if (isset($errors['phone_empty'])) : ?>
+                    <span class="error"><?php echo $errors['phone_empty']; ?></span>
+                <?php elseif (isset($errors['phone_invalid'])) : ?>
+                    <span class="error"><?php echo $errors['phone_invalid']; ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter your address" required></textarea>
+                <?php if (isset($errors['address_empty'])) : ?>
+                    <span class="error"><?php echo $errors['address_empty']; ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="gender" id="male" value="Male">
+                    <label class="form-check-label" for="male">Male</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
+                    <label class="form-check-label" for="female">Female</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="gender" id="other" value="Other">
+                    <label class="form-check-label" for="other">Other</label>
+                </div>
+                <?php if (isset($errors['gender_empty'])) : ?>
+                    <span class="error"><?php echo $errors['gender_empty']; ?></span>
+                <?php endif; ?>
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+    </div>
+
+</body>
+</html>
 </body>
 </html>
