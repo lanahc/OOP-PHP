@@ -384,7 +384,7 @@ class SigninForm {
 class ProfileForm {
     private $firstName;
     private $lastName;
-    private $email; 
+    private $email;
     private $phone;
     private $address;
     private $errors = [];
@@ -397,25 +397,96 @@ class ProfileForm {
         $this->address = $address;
     }
 
+    public function setFirstName($firstName) {
+        $this->firstName = $firstName;
+    }
+
+    public function getFirstName() {
+        return $this->firstName;
+    }
+
+    // Similar getter and setter methods for lastName, email, phone, and address
+
     public function validate() {
-        // Basic validation for profile fields
         if (empty($this->firstName)) {
             $this->errors['firstName_empty'] = "First name is required.";
         }
         if (empty($this->lastName)) {
             $this->errors['lastName_empty'] = "Last name is required.";
         }
-        // Add more validation rules as needed 
-        // (e.g., email validation, phone number format)
-
+        // Add more validation rules here (e.g., email format, phone number format)
         return empty($this->errors);
     }
 
     public function getErrors() {
         return $this->errors;
     }
+
+    public function saveToDatabase() {
+        // Implement database interaction here
+        // (e.g., insert or update user data in a database)
+        // This is a placeholder for database logic
+        echo "Profile data saved to the database."; 
+    }
 }
 
+// Usage
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $firstName = $_POST['firstName'];
+    $lastName = $_POST['lastName'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
+
+    $profileForm = new ProfileForm($firstName, $lastName, $email, $phone, $address);
+
+    if ($profileForm->validate()) {
+        // Save the profile data to the database
+        $profileForm->saveToDatabase(); 
+        // Redirect to profile page
+        header("Location: profile.php");
+        exit();
+    }
+}
+
+// Display the form 
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Form</title>
+</head>
+<body>
+
+    <h2>Profile Form</h2>
+
+    <form method="post" action="">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" value="<?php echo isset($_POST['firstName']) ? $_POST['firstName'] : ''; ?>">
+        <?php if (isset($profileForm) && isset($profileForm->getErrors()['firstName_empty'])) : ?>
+            <span class="error"><?php echo $profileForm->getErrors()['firstName_empty']; ?></span>
+        <?php endif; ?>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" value="<?php echo isset($_POST['lastName']) ? $_POST['lastName'] : ''; ?>">
+        <?php if (isset($profileForm) && isset($profileForm->getErrors()['lastName_empty'])) : ?>
+            <span class="error"><?php echo $profileForm->getErrors()['lastName_empty']; ?></span>
+        <?php endif; ?>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
+
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" name="phone" value="<?php echo isset($_POST['phone']) ? $_POST['phone'] : ''; ?>">
+
+        <label for="address">Address:</label>
+        <textarea id="address" name="address"><?php echo isset($_POST['address']) ? $_POST['address'] : ''; ?></textarea>
+
+        <button type="submit">Submit</button>
+    </form>
+
 </body>
 </html>
+
+<?php
