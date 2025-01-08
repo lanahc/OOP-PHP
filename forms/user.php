@@ -326,5 +326,43 @@ class SigninForm {
     }
 }
 ?>
+// ProfileForm.php (Example)
+<?php
+class ProfileForm {
+    private $firstName;
+    private $lastName;
+    private $email; 
+    private $phone;
+    private $address;
+    private $errors = [];
+
+    public function __construct($firstName, $lastName, $email, $phone, $address) {
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->email = $email;
+        $this->phone = $phone;
+        $this->address = $address;
+    }
+
+    public function validate() {
+        // Basic validation for profile fields
+        if (empty($this->firstName)) {
+            $this->errors['firstName_empty'] = "First name is required.";
+        }
+        if (empty($this->lastName)) {
+            $this->errors['lastName_empty'] = "Last name is required.";
+        }
+        // Add more validation rules as needed 
+        // (e.g., email validation, phone number format)
+
+        return empty($this->errors);
+    }
+
+    public function getErrors() {
+        return $this->errors;
+    }
+}
+
+?>
 </body>
 </html>
