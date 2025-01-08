@@ -335,7 +335,6 @@ class SigninForm {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In</title>
-    <?php require_once 'functions.php'; // Include functions.php ?>
     <?php require_once 'SigninForm.php'; // Include SigninForm class ?>
 </head>
 <body>
