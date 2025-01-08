@@ -222,22 +222,21 @@ class Form {
         <h2>Signup Form</h2>
         <?php
         if (isset($_POST['submit'])) {
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $phone = $_POST['phone'];
-            $address = $_POST['address'];
-            $gender = $_POST['gender'];
+    $name = $_POST['name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $gender = $_POST['gender'] ?? '';
 
-            $form = new Form($name, $email, $phone, $address, $gender);
+    $form = new Form($name, $email, $phone, $address, $gender);
 
-            if ($form->validate()) {
-                // Handle successful signup (e.g., redirect to welcome page)
-                // ...
-            } else {
-                $errors = $form->getErrors();
-            }
-        }
-        ?>
+    if ($form->validate()) {
+        // Handle successful signup (e.g., redirect to welcome page)
+        // ...
+    } else {
+        $errors = $form->getErrors();
+    }
+} ?>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
             <div class="form-group">
                 <label for="name">Full Name:</label>
