@@ -294,7 +294,7 @@ class Form {
 
 </body>
 </html>
-// SigninForm.php
+
 <?php
 class SigninForm {
     private $username;
@@ -326,8 +326,9 @@ class SigninForm {
     }
 }
 ?>
-// ProfileForm.php (Example)
+
 <?php
+
 class ProfileForm {
     private $firstName;
     private $lastName;
