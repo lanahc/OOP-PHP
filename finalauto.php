@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "includes/dbConnection.php";
+require "conn.php";
 
 // Class Auto Load
 function classAutoLoad($classname){
@@ -18,7 +18,7 @@ function classAutoLoad($classname){
     spl_autoload_register('classAutoLoad');
 
     $ObjGlob = new functions();
-    $ObjSendMail = new SendMail();
+    $ObjSendMail = new Mail();
 
 // Create instances of all classes
     $ObjCont = new contents();
