@@ -1,4 +1,4 @@
 <?php
-require_once 'core/init.php';
+require_once '../core/init.php';
 
-echo Config::get('mysql/host');//  '127.0.0.1
+echo Config::get('mysql/host');//  '127.0.0.1'
