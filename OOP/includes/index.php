@@ -1,4 +1,9 @@
 <?php
 require_once '../core/init.php';
 
-var_dump(Config::get('mysql/host'));//  '127.0.0.1'
+$users = DB::getInstance()->query('SELECT username FROM users');
+if($users->count()) {
+    foreach($users as $user) {
+        echo $user->username;
+    }
+}
