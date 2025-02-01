@@ -7,9 +7,10 @@ class Config{
 
             foreach($path as $bit) {
              if (isset($config[$bit])){
-                echo 'Set';
+            $config = $config[$bit];
              }
             }
+            return $config;
         }
     }
 }
