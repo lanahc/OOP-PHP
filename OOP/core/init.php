@@ -1,4 +1,6 @@
 <?php
+
+echo "init.php loaded!"; // Or var_dump($some_variable);
 session_start();
 
 $GLOBALS['config'] = array(
@@ -24,5 +26,6 @@ spl_autoload_register(function($class) {
 }
 );
 require_once '../functions/sanitize.php';
+
 
 
