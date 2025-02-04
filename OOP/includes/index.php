@@ -1,10 +1,16 @@
 <?php
 require_once __DIR__ . '/../core/init.php'; // Absolute path for testing
 
-$user = DB::getInstance()->get('users', array('username', '=', 'billy'));
+$db = DB::getInstance();
+$results = $db->query("SELECT * FROM users WHERE username = 'alex'")->results(); // Direct query
 
-if($user->error()) {
-    echo 'No user';
+var_dump($results); // Check the results
+
+if (count($results) > 0) {
+    echo "User found!";
 } else {
-    echo 'OK!';
+    foreach($user->results() as $user) {
+        echo $user->$username, '<br>';
+    }
+    
 }
