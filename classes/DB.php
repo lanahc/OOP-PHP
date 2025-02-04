@@ -77,11 +77,46 @@ class DB {
             $values = null;
             $x = 1;
 
-            $sql = "INSERT INTO users (`".implode('`,`', $keys) . "`)";
+            foreach($fields as $field) {
+                $values .= "?";
+                if($x < count($fields)){
+                    $values .= ', ';
 
-            echo $sql;
+                }
+                $x++;
+            }
+            
+
+            $sql = "INSERT INTO users (`".implode('`,`', $keys) . "`) VALUES ({$values})";
+
+          if($this->query($sql, $fields)->error()){
+               return true;
+          }
         }
+    return false;
+    }
+    public function update($table, $id, $fields = array()) {
+        $set = '';
+        $x = 1 ;
 
+        foreach($fields as $key => $value){
+            if($x > 1) {
+                $set .= ", " ;
+            }
+            $set.= $key . " = ?";
+            $x++;
+        }
+        
+
+        $sql = "UPDATE " . $table . " SET " . $set . " WHERE id = ?";
+        echo $sql . "<br>";
+
+        $values = array_values($fields);
+        $values[] = $id;
+        if(!$this->query($sql, $values)->error()){
+            return true;
+        }
+        return false;
     }
 
     public function results() {  
