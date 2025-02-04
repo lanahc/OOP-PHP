@@ -70,15 +70,32 @@ class DB {
     public function delete($table, $where){
         return $this->action('DELETE', $table, $where);
     }
+
+    public function insert($table, $fields = array()){
+        if(count($fields)) {
+            $keys = array_keys($fields);
+            $values = null;
+            $x = 1;
+
+            $sql = "INSERT INTO users (`".implode('`,`', $keys) . "`)";
+
+            echo $sql;
+        }
+
+    }
+
     public function results() {  
         return $this->_results;
     }
+
     public function first() {
         return $this->results()[0];
     }
+
     public function error() {
         return $this->_error;
     }
+
     public function count() {
         return $this->_count;
     }
