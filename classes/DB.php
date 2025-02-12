@@ -9,7 +9,7 @@ class DB {
 
     private function __construct() {
         try {
-            echo 'Connected';// For debugging - remove in production
+            
             $this->_pdo = new PDO('mysql:host=' . Config::get('mysql/host') . ';dbname=' . Config::get('mysql/db'), Config::get('mysql/username'), Config::get('mysql/password'));
             $this->_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
@@ -26,7 +26,6 @@ class DB {
 
     public function query($sql, $params = array()) {
         $this->_error = false;
-        echo "SQL Query:"  . $sql . "<br>";
         if($this->_query = $this->_pdo->prepare($sql)) {
            if(count($params)) {
             $x = 1;
