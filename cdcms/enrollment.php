@@ -1,6 +1,25 @@
+<?php
+// Add this at the top of enrollment.php
+if(!isset($_SESSION['login_id'])){
+    echo "<script>location.href='./?page=auth';</script>";
+    exit;
+}
+// Add this near the top of the file, after any existing PHP opening tags
+$program_id = isset($_GET['program_id']) ? $_GET['program_id'] : '';
+if($program_id){
+    $program = $conn->query("SELECT * FROM service_list WHERE id = ".$conn->real_escape_string($program_id));
+    if($program->num_rows > 0){
+        $program_data = $program->fetch_assoc();
+    }
+}
+?>
+
 <div class="content py-3">
     <div class="container-fluid">
         <h3 class="text-center"><b>Enrollment Form</b></h3>
+        <?php if(isset($program_data)): ?>
+        <h4 class="text-center text-muted">Program: <?= ucwords($program_data['name']) ?></h4>
+        <?php endif; ?>
         <hr class="bg-navy">
         <?php if($_settings->chk_flashdata('pop_msg')): ?>
             <div class="alert alert-success">
@@ -17,6 +36,7 @@
                 <div class="container-fluid">
                     <form action="" id="enrollment-form">
                         <input type="hidden" name="id" value="">
+                        <input type="hidden" name="program_id" value="<?= $program_id ?>">
                         <fieldset>
                             <legend class="text-navy">Child's Information</legend>
                             <div class="row">

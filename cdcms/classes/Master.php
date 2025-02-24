@@ -293,6 +293,87 @@ Class Master extends DBConnection {
 		$this->settings->set_flashdata('success',$resp['msg']);
 		return json_encode($resp);
 	}
+	// Add this function to your existing Master.php class
+
+public function register_parent() {
+    extract($_POST);
+    
+    // Validate email uniqueness
+    $check = $this->conn->query("SELECT * FROM `parent_list` where `email` = '{$email}'")->num_rows;
+    if($check > 0) {
+        $resp['status'] = 'failed';
+        $resp['msg'] = 'Email already exists.';
+        return json_encode($resp);
+    }
+
+    // Hash password
+    $password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Begin transaction
+    $this->conn->begin_transaction();
+
+    try {
+        // Insert parent data
+        $sql = "INSERT INTO parent_list (firstname, middlename, lastname, email, password, contact, address) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("sssssss", 
+            $firstname,
+            $middlename,
+            $lastname,
+            $email,
+            $password,
+            $contact,
+            $address
+        );
+        $stmt->execute();
+        $parent_id = $this->conn->insert_id;
+
+        // Insert children data
+        if(isset($children) && is_array($children)) {
+            $child_sql = "INSERT INTO children_list (parent_id, firstname, middlename, lastname, gender, dob, age_group) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $child_stmt = $this->conn->prepare($child_sql);
+
+            foreach($children as $child) {
+                $child_stmt->bind_param("issssss",
+                    $parent_id,
+                    $child['firstname'],
+                    $child['middlename'],
+                    $child['lastname'],
+                    $child['gender'],
+                    $child['dob'],
+                    $child['age_group']
+                );
+                $child_stmt->execute();
+            }
+        }
+
+        // Commit transaction
+        $this->conn->commit();
+
+        // Set session variables
+        $_SESSION['login_id'] = $parent_id;
+        $_SESSION['login_type'] = 'parent';
+        $_SESSION['login_name'] = $firstname . ' ' . $lastname;
+
+        // Prepare response
+        $resp['status'] = 'success';
+        $resp['msg'] = 'Registration successful';
+        if(isset($redirect) && !empty($redirect)) {
+            $resp['redirect'] = $redirect;
+        }
+
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $this->conn->rollback();
+        $resp['status'] = 'failed';
+        $resp['msg'] = 'An error occurred: ' . $e->getMessage();
+        $resp['error'] = $e->getMessage();
+    }
+
+    return json_encode($resp);
+}
 }
 
 $Master = new Master();

@@ -1,33 +1,90 @@
 <?php
 // This will be included in your home.php or index.php in admin
-$stats = $conn->query("SELECT 
-    (SELECT COUNT(*) FROM children WHERE delete_flag = 0) as total_children,
-    (SELECT COUNT(*) FROM babysitters WHERE delete_flag = 0) as total_babysitters,
-    (SELECT COUNT(*) FROM enrollments WHERE status = 'pending' AND delete_flag = 0) as pending_enrollments,
-    (SELECT COUNT(*) FROM enrollments WHERE status = 'confirmed' AND delete_flag = 0) as confirmed_enrollments
-");
-$stats_row = $stats->fetch_assoc();
+try {
+    $stats = $conn->query("SELECT 
+        (SELECT COUNT(*) FROM children WHERE delete_flag = 0) as total_children,
+        (SELECT COUNT(*) FROM babysitters WHERE delete_flag = 0) as total_babysitters,
+        (SELECT COUNT(*) FROM enrollments WHERE status = 'pending' AND delete_flag = 0) as pending_enrollments,
+        (SELECT COUNT(*) FROM enrollments WHERE status = 'confirmed' AND delete_flag = 0) as confirmed_enrollments
+    ");
+    
+    if ($stats) {
+        $stats_row = $stats->fetch(PDO::FETCH_ASSOC);
+    } else {
+        $stats_row = [
+            'total_children' => 0,
+            'total_babysitters' => 0,
+            'pending_enrollments' => 0,
+            'confirmed_enrollments' => 0
+        ];
+    }
+} catch (PDOException $e) {
+    // Handle any database errors
+    $stats_row = [
+        'total_children' => 0,
+        'total_babysitters' => 0,
+        'pending_enrollments' => 0,
+        'confirmed_enrollments' => 0
+    ];
+    error_log("Database Error: " . $e->getMessage());
+}
 ?>
 
 <div class="row">
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-child"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Children</span>
-                <span class="info-box-number"><?= number_format($stats_row['total_children']) ?></span>
+    <!-- Service List -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3><?= number_format($stats_row['total_services']) ?></h3>
+                <p>Service List</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-list"></i>
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-user-friends"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Babysitters</span>
-                <span class="info-box-number"><?= number_format($stats_row['total_babysitters']) ?></span>
+
+    <!-- Babysitters List -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3><?= number_format($stats_row['total_babysitters']) ?></h3>
+                <p>Babysitters List</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-friends"></i>
             </div>
         </div>
     </div>
+
+    <!-- Pending Enrollee -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3><?= number_format($stats_row['pending_enrollments']) ?></h3>
+                <p>Pending Enrollee</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-file"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmed Enrollee -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3><?= number_format($stats_row['confirmed_enrollments']) ?></h3>
+                <p>Confirmed Enrollee</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
@@ -40,30 +97,50 @@ $stats_row = $stats->fetch_assoc();
     </div>
 </div>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+
 <script>
-$(function(){
-    var enrollmentChartCanvas = $('#enrollmentChart').get(0).getContext('2d')
-    var enrollmentData = {
-        labels: ['Pending', 'Confirmed'],
-        datasets: [{
-            data: [
-                <?= $stats_row['pending_enrollments'] ?>,
-                <?= $stats_row['confirmed_enrollments'] ?>
-            ],
-            backgroundColor: ['#ffc107', '#28a745']
-        }]
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the canvas element
+    const ctx = document.getElementById('enrollmentChart');
+    
+    if(ctx) {
+        // Create the chart
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending Enrollments', 'Confirmed Enrollments'],
+                datasets: [{
+                    data: [
+                        <?= $stats_row['pending_enrollments'] ?>,
+                        <?= $stats_row['confirmed_enrollments'] ?>
+                    ],
+                    backgroundColor: [
+                        '#ffc107', // warning color for pending
+                        '#28a745'  // success color for confirmed
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('Could not find enrollment chart canvas');
     }
-    var enrollmentChartOptions = {
-        maintainAspectRatio: false,
-        responsive: true,
-        legend: {
-            position: 'bottom'
-        }
-    }
-    new Chart(enrollmentChartCanvas, {
-        type: 'doughnut',
-        data: enrollmentData,
-        options: enrollmentChartOptions
-    })
-})
+});
 </script> 

@@ -13,7 +13,7 @@
   	<title><?php echo $_settings->info('title') != false ? $_settings->info('title').' | ' : '' ?><?php echo $_settings->info('name') ?></title>
     <link rel="icon" href="<?php echo validate_image($_settings->info('logo')) ?>" />
     <!-- Google Font: Source Sans Pro -->
-    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&amp;display=fallback"> -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="<?php echo base_url ?>plugins/fontawesome-free/css/all.min.css">
     <!-- Ionicons -->
@@ -59,6 +59,7 @@
         var _base_url_ = '<?php echo base_url ?>';
     </script>
     <script src="<?php echo base_url ?>dist/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
     #main-header{
         position:relative;
@@ -81,3 +82,72 @@
 
  </style>
   </head>
+
+<style>
+/* Global font settings */
+body, h1, h2, h3, h4, h5, h6, p, span, div, .info-box-text, .info-box-number {
+    font-family: "Times New Roman", Times, serif !important;
+}
+
+[data-theme="dark"] {
+    --bg-main: #1a1a1a;
+    --text-main: #ffffff;
+    --card-bg: #2d2d2d;
+}
+
+[data-theme="light"] {
+    --bg-main: #f4f6f9;
+    --text-main: #1a1a1a;
+    --card-bg: #ffffff;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.card {
+    background-color: var(--card-bg);
+}
+
+/* Enhance readability with Times New Roman */
+.info-box-text {
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+.info-box-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* Make headings more elegant with Times New Roman */
+h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+</style>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Add theme toggle button to navbar
+document.addEventListener('DOMContentLoaded', function() {
+    const theme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', theme);
+});
+</script>

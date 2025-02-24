@@ -6,12 +6,87 @@
         object-position:center center;
         border-radius:100%;
     }
+    .card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border-radius: 15px !important;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.5rem;
+    }
+    .table {
+        font-family: "Times New Roman", Times, serif;
+    }
+    .table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    .badge {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .badge-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+    }
+    .badge-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #4b6cb7, #182848);
+        border: none;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+    .dropdown-item {
+        padding: 8px 20px;
+        transition: all 0.2s ease;
+    }
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    .program-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    .category-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+    .category-daycare { background-color: #e3f2fd; color: #1976d2; }
+    .category-preschool { background-color: #f3e5f5; color: #7b1fa2; }
+    .category-afterschool { background-color: #e8f5e9; color: #388e3c; }
+    .category-special { background-color: #fff3e0; color: #f57c00; }
+    .price-column { font-weight: bold; color: #2196f3; }
 </style>
-<div class="card card-outline card-info rounded-0 shadow">
+<div class="card card-outline card-info">
 	<div class="card-header">
-		<h3 class="card-title">List of Service</h3>
+		<h3 class="card-title">Programs & Services</h3>
 		<div class="card-tools">
-			<a href="javascript:void(0)" id="create_new" class="btn btn-flat btn-sm btn-primary"><span class="fas fa-plus"></span>  Add New Service</a>
+			<button id="create_new" class="btn btn-primary">
+				<i class="fas fa-plus-circle mr-2"></i>Add New Program
+			</button>
 		</div>
 	</div>
 	<div class="card-body">
@@ -20,18 +95,22 @@
 			<table class="table table-hover table-striped">
 				<colgroup>
 					<col width="5%">
-					<col width="20%">
-					<col width="20%">
-					<col width="30%">
 					<col width="15%">
+					<col width="15%">
+					<col width="15%">
+					<col width="15%">
+					<col width="15%">
+					<col width="10%">
 					<col width="10%">
 				</colgroup>
 				<thead>
 					<tr>
 						<th>#</th>
-						<th>Date Created</th>
-						<th>Name</th>
-						<th>Description</th>
+						<th>Image</th>
+						<th>Category</th>
+						<th>Program Name</th>
+						<th>Price</th>
+						<th>Age Group</th>
 						<th>Status</th>
 						<th>Action</th>
 					</tr>
@@ -39,27 +118,36 @@
 				<tbody>
 					<?php 
 						$i = 1;
-						$qry = $conn->query("SELECT * from `service_list`order by `name` asc ");
+						$qry = $conn->query("SELECT * from `service_list` order by `category`, `name` asc");
 						while($row = $qry->fetch_assoc()):
-						$row['description'] = strip_tags(html_entity_decode($row['description']));
 					?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
-							<td class=""><?php echo date("Y-m-d H:i",strtotime($row['date_created'])) ?></td>
+							<td>
+								<img src="<?php echo base_url . $row['image_path'] ?>" 
+									 alt="Program Image" 
+									 class="program-image">
+							</td>
+							<td>
+								<span class="category-badge category-<?php echo $row['category'] ?>">
+									<?php echo ucfirst($row['category']) ?>
+								</span>
+							</td>
 							<td><?php echo ucwords($row['name']) ?></td>
-							<td class="truncate-1"><?php echo $row['description'] ?></td>
+							<td class="price-column">₱<?php echo number_format($row['price'], 2) ?></td>
+							<td><?php echo $row['age_group'] ?></td>
 							<td class="text-center">
-                                <?php
-                                    switch($row['status']){
-                                        case '1':
-                                            echo "<span class='badge badge-success badge-pill'>Active</span>";
-                                            break;
-                                        case '0':
-                                            echo "<span class='badge badge-secondary badge-pill'>Inactive</span>";
-                                            break;
-                                    }
-                                ?>
-                            </td>
+								<?php
+									switch($row['status']){
+										case '1':
+											echo "<span class='badge badge-success'>Active</span>";
+											break;
+										case '0':
+											echo "<span class='badge badge-secondary'>Inactive</span>";
+											break;
+									}
+								?>
+							</td>
 							<td align="center">
 								 <button type="button" class="btn btn-flat btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
 				                  		Action

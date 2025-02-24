@@ -72,6 +72,44 @@ class Login extends DBConnection {
 			redirect('./');
 		}
 	}
+	public function login_parent() {
+		extract($_POST);
+		
+		$sql = "SELECT * FROM parent_list WHERE email = ?";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->bind_param("s", $email);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result->num_rows > 0) {
+			$data = $result->fetch_assoc();
+			if(password_verify($password, $data['password'])) {
+				if($data['status'] == 1) {
+					foreach($data as $k => $v) {
+						if(!is_numeric($k) && $k != 'password') {
+							$_SESSION['login_'.$k] = $v;
+						}
+					}
+					$_SESSION['login_type'] = 'parent';
+					
+					$resp['status'] = 'success';
+					if(isset($redirect) && !empty($redirect)) {
+						$resp['redirect'] = $redirect;
+					}
+				} else {
+					$resp['status'] = 'failed';
+					$resp['msg'] = 'Your account has been deactivated. Please contact the administrator.';
+				}
+			} else {
+				$resp['status'] = 'failed';
+				$resp['msg'] = 'Incorrect password.';
+			}
+		} else {
+			$resp['status'] = 'failed';
+			$resp['msg'] = 'Email not found.';
+		}
+		return json_encode($resp);
+	}
 }
 $action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
 $auth = new Login();
@@ -87,6 +125,9 @@ switch ($action) {
 		break;
 	case 'student_logout':
 		echo $auth->student_logout();
+		break;
+	case 'login_parent':
+		echo $auth->login_parent();
 		break;
 	default:
 		echo $auth->index();
