@@ -62,6 +62,9 @@
                 <a href="./" class="nav-link <?= isset($page) && $page =='home' ? "active" : "" ?>">Home</a>
               </li>
               <li class="nav-item">
+                <a href="./?page=about" class="nav-link <?= isset($page) && $page =='about' ? "active" : "" ?>">About Us</a>
+              </li>
+              <li class="nav-item">
                 <a href="./?page=programs" class="nav-link <?= isset($page) && $page =='programs' ? "active" : "" ?>">Programs</a>
               </li>
               <li class="nav-item">
@@ -70,9 +73,7 @@
               <li class="nav-item">
                 <a href="./?page=enrollment" class="nav-link <?= isset($page) && $page =='enrollment' ? "active" : "" ?>">Enrollment</a>
               </li>
-              <li class="nav-item">
-                <a href="./?page=about" class="nav-link <?= isset($page) && $page =='about' ? "active" : "" ?>">About Us</a>
-              </li>
+              
               <!-- <li class="nav-item">
                 <a href="#" class="nav-link">Contact</a>
               </li> -->
