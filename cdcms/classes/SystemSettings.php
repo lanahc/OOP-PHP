@@ -186,6 +186,15 @@ class SystemSettings extends DBConnection{
 			$_SESSION['system_info'][$field] = $value;
 		}
 	}
+	function getSystemInfo(){
+		// ... existing code ...
+		$stats = getTotalStats($this->conn);
+		foreach($stats as $k => $v){
+			$this->settings[$k] = $v;
+		}
+		return $this->settings;
+	}
+	
 }
 $_settings = new SystemSettings();
 $_settings->load_system_info();
