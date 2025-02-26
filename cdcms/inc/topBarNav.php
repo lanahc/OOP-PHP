@@ -33,13 +33,16 @@
             <span class="mr-2  text-white"><i class="fa fa-phone mr-1"></i> <?= $_settings->info('contact') ?></span>
           </div>
           <div>
-            <?php if($_settings->userdata('id') > 0): ?>
-              <span class="mx-2"><img src="<?= validate_image($_settings->userdata('avatar')) ?>" alt="User Avatar" id="student-img-avatar"></span>
-              <span class="mx-2">Howdy, <?= !empty($_settings->userdata('username')) ? $_settings->userdata('username') : "" ?></span>
-              <span class="mx-1"><a href="<?= base_url.'classes/Login.php?f=logout' ?>"><i class="fa fa-power-off"></i></a></span>
-            <?php else: ?>
-              <a href="./admin" class="mx-2 text-light">Admin login</a>
-            <?php endif; ?>
+            <div class="d-flex align-items-center">
+                <?php if(isset($_SESSION['login_id'])): ?>
+                    <span class="text-white me-2">Hello, <?php echo $_SESSION['login_firstname']; ?>!</span>
+                    <a href="./classes/Login.php?f=logout" class="text-white ms-2">Logout</a>
+                <?php else: ?>
+                    <a href="./?page=parent_login" class="btn btn-outline-light me-2">Parent Login</a>
+                    <a href="./?page=parent_registration" class="btn btn-outline-light me-2">Parent Registration</a>
+                    <a href="./admin/login.php" class="text-white ms-2">Admin login</a>
+                <?php endif; ?>
+            </div>
           </div>
         </div>
       </nav>

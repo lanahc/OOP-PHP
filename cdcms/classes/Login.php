@@ -13,7 +13,8 @@ class Login extends DBConnection {
 		parent::__destruct();
 	}
 	public function index(){
-		echo "<h1>Access Denied</h1> <a href='".base_url."'>Go Back.</a>";
+		header('Content-Type: application/json');
+		echo json_encode(array('status' => 'error', 'message' => 'Access Denied'));
 	}
 	public function login(){
 		extract($_POST);
@@ -30,6 +31,12 @@ class Login extends DBConnection {
 				}
 			}
 			$this->settings->set_userdata('login_type',1);
+			$_SESSION['login_id'] = $res['id'];
+			$_SESSION['login_firstname'] = $res['firstname'];
+			$_SESSION['login_lastname'] = $res['lastname'];
+			$_SESSION['login_email'] = $res['email'];
+			$_SESSION['login_contact'] = $res['contact'];
+			$_SESSION['login_address'] = $res['address'];
 		return json_encode(array('status'=>'success'));
 		}else{
 		return json_encode(array('status'=>'incorrect','last_qry'=>"SELECT * from users where username = '$username' and password = md5('$password') "));
@@ -74,41 +81,94 @@ class Login extends DBConnection {
 	}
 	public function login_parent() {
 		extract($_POST);
-		
-		$sql = "SELECT * FROM parent_list WHERE email = ?";
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bind_param("s", $email);
+		$password = md5($password);
+		$stmt = $this->conn->prepare("SELECT * FROM parent_list where email = ? and password = ? ");
+		$stmt->bind_param("ss", $email, $password);
 		$stmt->execute();
 		$result = $stmt->get_result();
+		if($result->num_rows > 0){
+			$data = $result->fetch_array();
+			if($data['status'] == 1){
+				// Set all necessary session variables
+				$_SESSION['login_id'] = $data['id'];
+				$_SESSION['login_firstname'] = $data['firstname'];
+				$_SESSION['login_lastname'] = $data['lastname'];
+				$_SESSION['login_email'] = $data['email'];
+				$_SESSION['login_contact'] = $data['contact'];
+				$_SESSION['login_address'] = $data['address'];
+				$_SESSION['login_type'] = 3; // 3 for parent
+				$_SESSION['parent_login'] = true;
 
-		if($result->num_rows > 0) {
-			$data = $result->fetch_assoc();
-			if(password_verify($password, $data['password'])) {
-				if($data['status'] == 1) {
-					foreach($data as $k => $v) {
-						if(!is_numeric($k) && $k != 'password') {
-							$_SESSION['login_'.$k] = $v;
-						}
-					}
-					$_SESSION['login_type'] = 'parent';
-					
-					$resp['status'] = 'success';
-					if(isset($redirect) && !empty($redirect)) {
-						$resp['redirect'] = $redirect;
-					}
-				} else {
-					$resp['status'] = 'failed';
-					$resp['msg'] = 'Your account has been deactivated. Please contact the administrator.';
-				}
-			} else {
-				$resp['status'] = 'failed';
-				$resp['msg'] = 'Incorrect password.';
+				return json_encode(array(
+					'status' => 'success',
+					'redirect' => 'parent_dashboard.php'
+				));
+			}else{
+				return json_encode(array('status'=>'failed','msg'=>'Your Account has been blocked.'));
 			}
-		} else {
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'Email not found.';
+		}else{
+			return json_encode(array('status'=>'failed','msg'=>'Invalid email or password.'));
 		}
-		return json_encode($resp);
+	}
+	public function register_parent(){
+		// Set proper content type header
+		header('Content-Type: application/json');
+		
+		try {
+			extract($_POST);
+			
+			// Validate required fields
+			if(empty($firstname) || empty($lastname) || empty($email) || empty($password) || empty($contact)){
+				echo json_encode([
+					'status' => 'failed',
+					'msg' => 'All fields are required.'
+				]);
+				return;
+			}
+			
+			// Check if email already exists
+			$check = $this->conn->prepare("SELECT * FROM parent_list where email = ?");
+			$check->bind_param("s", $email);
+			$check->execute();
+			if($check->get_result()->num_rows > 0){
+				echo json_encode([
+					'status' => 'failed',
+					'msg' => 'Email already exists.'
+				]);
+				return;
+			}
+			
+			// Hash password
+			$password = md5($password);
+			
+			// Insert new parent
+			$stmt = $this->conn->prepare("INSERT INTO parent_list (firstname, middlename, lastname, email, password, contact, address) VALUES (?, ?, ?, ?, ?, ?, ?)");
+			$stmt->bind_param("sssssss", $firstname, $middlename, $lastname, $email, $password, $contact, $address);
+			
+			if($stmt->execute()){
+				$_SESSION['parent_login'] = true;
+				$_SESSION['parent_id'] = $this->conn->insert_id;
+				$_SESSION['parent_name'] = $firstname . ' ' . $lastname;
+				$_SESSION['parent_email'] = $email;
+				
+				echo json_encode([
+					'status' => 'success',
+					'msg' => 'Registration successful'
+				]);
+			}else{
+				echo json_encode([
+					'status' => 'failed',
+					'msg' => 'An error occurred while saving the data.'
+				]);
+			}
+		} catch (Exception $e) {
+			error_log("Registration Error: " . $e->getMessage()); // Add logging
+			echo json_encode([
+				'status' => 'failed',
+				'msg' => 'Server error: ' . $e->getMessage()
+			]);
+		}
+		exit;
 	}
 }
 $action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
@@ -128,6 +188,9 @@ switch ($action) {
 		break;
 	case 'login_parent':
 		echo $auth->login_parent();
+		break;
+	case 'register_parent':
+		echo $auth->register_parent();
 		break;
 	default:
 		echo $auth->index();

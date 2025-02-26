@@ -1,5 +1,11 @@
 <?php
-if(!isset($_SESSION['login_id']) || $_SESSION['login_type'] != 'parent'){
+if (!isset($_SESSION['login_id']) || empty($_SESSION['login_id'])) {
+    // Redirect to login page if not logged in
+    redirect('login.php');
+    exit;
+}
+
+if(!isset($_SESSION['parent_login']) || $_SESSION['parent_login'] != true){
     header("Location: ./?page=auth");
     exit;
 }

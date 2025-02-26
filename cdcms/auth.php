@@ -11,17 +11,37 @@ $redirect = $program_id ? "?page=enrollment&program_id=".$program_id : "";
 <html>
 <head>
     <title>Parent Registration/Login</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    // Add base URL definition
+    var _base_url_ = '<?php echo base_url ?>';
+    
     // Prevent any extension interference
     window.addEventListener('load', function() {
         // Override any problematic functions
         window.getCategory = null;
         
+        // Add switch form functionality
+        $('#switch_form').click(function(){
+            if($('#registration-form').is(':visible')){
+                $('#registration-form').hide();
+                $('#login-form').show();
+                $(this).text('Switch to Registration');
+            }else{
+                $('#registration-form').show();
+                $('#login-form').hide();
+                $(this).text('Switch to Login');
+            }
+        });
+        
         // Your existing jQuery code
         $(function(){
-            $('#registration_form').submit(function(e){
+            $('#registration-form').submit(function(e){
                 e.preventDefault();
-                e.stopPropagation(); // Stop event propagation
+                e.stopPropagation();
                 
                 if($('#password').val() != $('#confirm_password').val()){
                     alert("Passwords do not match");
@@ -29,28 +49,43 @@ $redirect = $program_id ? "?page=enrollment&program_id=".$program_id : "";
                 }
 
                 $.ajax({
-                    url: _base_url_+"classes/Master.php?f=register_parent",
+                    url: _base_url_+"classes/Login.php?f=register_parent",
                     data: $(this).serialize(),
                     method: 'POST',
                     dataType: 'json',
+                    beforeSend: function(){
+                        // Add loading state if needed
+                    },
                     success:function(resp){
-                        if(resp.status == 'success'){
-                            alert("Registration successful!");
-                            location.href = _base_url_;
-                        }else{
-                            alert(resp.msg);
+                        try {
+                            // Handle response as JSON
+                            if(typeof resp === 'string') {
+                                resp = JSON.parse(resp);
+                            }
+                            
+                            if(resp.status == 'success'){
+                                alert("Registration successful!");
+                                location.href = _base_url_+"?page=parent_dashboard";
+                            }else{
+                                alert(resp.msg || "Registration failed");
+                            }
+                        } catch(e) {
+                            console.error("JSON Parse error:", e);
+                            alert("An error occurred while processing the response");
                         }
                     },
-                    error:function(err){
-                        console.log(err);
-                        alert("An error occurred");
+                    error:function(xhr, status, error){
+                        console.log("Raw response:", xhr.responseText);
+                        console.log("Status:", status);
+                        console.log("Error:", error);
+                        alert("An error occurred during registration");
                     }
                 });
                 
-                return false; // Prevent form submission
+                return false;
             });
 
-            $('#login_form').submit(function(e){
+            $('#login-form').submit(function(e){
                 e.preventDefault();
                 e.stopPropagation(); // Stop event propagation
                 
@@ -66,10 +101,12 @@ $redirect = $program_id ? "?page=enrollment&program_id=".$program_id : "";
                             alert(resp.msg);
                         }
                     },
-                    error: function(err) {
-    console.log(err);
-    alert("An error occurred: " + err.status + " - " + err.statusText);
-}
+                    error: function(xhr, status, error) {
+                        console.log("XHR Status:", status);
+                        console.log("Error:", error);
+                        console.log("Response:", xhr.responseText);
+                        alert("An error occurred. Status: " + status + ", Error: " + error);
+                    }
                 });
                 
                 return false; // Prevent form submission
@@ -92,7 +129,7 @@ $redirect = $program_id ? "?page=enrollment&program_id=".$program_id : "";
                         </div>
                         <div class="card-body">
                             <!-- Registration Form -->
-                            <form action="" id="registration_form" class="needs-validation">
+                            <form id="registration-form" class="needs-validation">
                                 <input type="hidden" name="redirect" value="<?= $redirect ?>">
                                 <div class="row">
                                     <div class="col-md-4">
@@ -140,7 +177,7 @@ $redirect = $program_id ? "?page=enrollment&program_id=".$program_id : "";
                             </form>
 
                             <!-- Login Form -->
-                            <form action="" id="login_form" style="display: none;">
+                            <form id="login-form" style="display: none;">
                                 <input type="hidden" name="redirect" value="<?= $redirect ?>">
                                 <div class="form-group">
                                     <label for="login_email">Email Address</label>

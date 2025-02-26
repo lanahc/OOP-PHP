@@ -10,6 +10,25 @@ require_once('classes/SystemSettings.php');
 $db = new DBConnection;
 $conn = $db->conn;
 
+// Add this if it's not already present
+if(!defined('base_url')) {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https://' : 'http://';
+    $server_name = $_SERVER['SERVER_NAME'];
+    $server_port = $_SERVER['SERVER_PORT'];
+    $base_path = dirname($_SERVER['SCRIPT_NAME']);
+    
+    // Remove "/cdcms" from path if it exists
+    $base_path = str_replace('/cdcms', '', $base_path);
+    
+    // Add port only if it's not standard (80 for HTTP, 443 for HTTPS)
+    $port = ($server_port == '80' || $server_port == '443') ? '' : ':' . $server_port;
+    
+    define('base_url', $protocol . $server_name . $port . $base_path . '/');
+}
+
+// You can test it by uncommenting this line:
+// echo base_url;
+
 function redirect($url=''){
 	if(!empty($url))
 	echo '<script>location.href="'.base_url .$url.'"</script>';
@@ -84,5 +103,9 @@ function getSystemInfo(){
     return $this->settings;
 }
 
+// Remove or comment out this line as it's causing unwanted output
+// echo "Base URL is: " . base_url;
+
 ob_end_flush();
+
 ?>

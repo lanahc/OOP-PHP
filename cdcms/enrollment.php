@@ -21,16 +21,7 @@ if($program_id){
         <h4 class="text-center text-muted">Program: <?= ucwords($program_data['name']) ?></h4>
         <?php endif; ?>
         <hr class="bg-navy">
-        <?php if($_settings->chk_flashdata('pop_msg')): ?>
-            <div class="alert alert-success">
-                <i class="fa fa-check mr-2"></i> <?= $_settings->flashdata('pop_msg') ?>
-            </div>
-            <script>
-                $(function(){
-                    $('html, body').animate({scrollTop:0})
-                })
-            </script>
-        <?php endif; ?>
+        <div id="msg-container"></div>
         <div class="card card-outline card-info rounded-0 shadow">
             <div class="card-body rounded-0">
                 <div class="container-fluid">
@@ -126,44 +117,46 @@ if($program_id){
 <script>
     $(function(){
         $('#enrollment-form').submit(function(e){
-            e.preventDefault()
-            var _this = $(this)
-            $('.pop-msg').remove()
-            var el = $('<div>')
-                el.addClass("pop-msg alert")
-                el.hide()
+            e.preventDefault();
+            var _this = $(this);
+            $('.err-msg').remove();
             start_loader();
             $.ajax({
-                url:_base_url_+"classes/Master.php?f=save_enrollment",
-				data: new FormData($(this)[0]),
+                url: _base_url_+'classes/Master.php?f=save_enrollment',
+                data: new FormData($(this)[0]),
                 cache: false,
                 contentType: false,
                 processData: false,
                 method: 'POST',
                 type: 'POST',
                 dataType: 'json',
-				error:err=>{
-					console.log(err)
-					alert_toast("An error occured",'error');
-					end_loader();
-				},
-                success:function(resp){
-                    if(resp.status == 'success'){
-                        location.reload();
-                    }else if(!!resp.msg){
-                        el.addClass("alert-danger")
-                        el.text(resp.msg)
-                        _this.prepend(el)
-                    }else{
-                        el.addClass("alert-danger")
-                        el.text("An error occurred due to unknown reason.")
-                        _this.prepend(el)
-                    }
-                    el.show('slow')
-                    $('html, body').animate({scrollTop:0},'fast')
+                error:err=>{
+                    console.log(err)
+                    alert_toast("An error occurred", 'error');
                     end_loader();
+                },
+                success:function(resp){
+                    if(typeof resp =='object' && resp.status == 'success'){
+                        _this.hide();
+                        $('#msg-container').html(`
+                            <div class="alert alert-success">
+                                ${resp.msg}
+                            </div>
+                        `);
+                        $("html, body").animate({ scrollTop: 0 }, "fast");
+                    }else if(resp.status == 'failed' && !!resp.msg){
+                        var el = $('<div>')
+                            el.addClass("alert alert-danger err-msg").text(resp.msg)
+                            _this.prepend(el)
+                            el.show('slow')
+                            $("html, body").animate({ scrollTop: 0 }, "fast");
+                    }else{
+                        alert_toast("An error occurred", 'error');
+                        console.log(resp)
+                    }
+                    end_loader()
                 }
             })
-        })
-    })
+        });
+    });
 </script>

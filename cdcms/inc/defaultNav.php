@@ -162,3 +162,32 @@
       </ul>
     </div>
   </nav>
+
+<!-- Navigation-->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-shrink" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="#page-top"><span class="text-warning">Kiddie</span> Care</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars ms-1"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                <li class="nav-item"><a class="nav-link" href="<?php echo $page == 'home' ? '#' : './' ?>">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="./?page=about">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="./?page=programs">Programs</a></li>
+                <li class="nav-item"><a class="nav-link" href="./?page=babysitters">Babysitters</a></li>
+                <li class="nav-item"><a class="nav-link" href="./?page=enrollment">Enrollment</a></li>
+                <?php if(isset($_SESSION['login_id']) && $_SESSION['login_type'] == 'parent'): ?>
+                    <li class="nav-item"><a class="nav-link" href="./?page=parent_dashboard">Parent Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./classes/Login.php?f=logout">Logout</a></li>
+                    <li class="nav-item"><span class="nav-link">Hello, <?php echo $_SESSION['login_firstname']; ?>!</span></li>
+                <?php else: ?>
+                    <li class="nav-item"><a class="nav-link" href="./?page=parent_login">Parent Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./?page=parent_registration">Register</a></li>
+                <?php endif; ?>
+                <li class="nav-item"><a class="nav-link" href="./admin">Admin</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>

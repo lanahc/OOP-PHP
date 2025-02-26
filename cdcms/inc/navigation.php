@@ -46,6 +46,22 @@
                         </p>
                       </a>
                     </li>
+                    <?php if($_settings->userdata('type') == 1): ?>
+                        <!-- Admin Only Navigation -->
+                        <li class="nav-item">
+                            <a href="<?php echo base_url ?>admin/index.php" class="nav-link nav-home">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?php echo base_url ?>admin/parents.php" class="nav-link nav-parents">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Parents</p>
+                            </a>
+                        </li>
+                        <!-- Other admin menu items -->
+                    <?php endif; ?>
                   </ul>
                 </nav>
                 <!-- /.sidebar-menu -->

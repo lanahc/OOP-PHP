@@ -30,6 +30,12 @@ try {
 }
 ?>
 
+<!-- Required CSS and JavaScript libraries -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <div class="row">
     <!-- Service List -->
     <div class="col-lg-3 col-6">
@@ -88,7 +94,12 @@ try {
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Enrollment Statistics</h3>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Enrollment Statistics</h3>
+                    <button class="btn btn-primary btn-sm" id="exportButton">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <canvas id="enrollmentChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -97,16 +108,12 @@ try {
     </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Get the canvas element
+// Wait for all libraries to load
+window.onload = function() {
+    // Initialize Chart
     const ctx = document.getElementById('enrollmentChart');
-    
     if(ctx) {
-        // Create the chart
         new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -117,8 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <?= $stats_row['confirmed_enrollments'] ?>
                     ],
                     backgroundColor: [
-                        '#ffc107', // warning color for pending
-                        '#28a745'  // success color for confirmed
+                        '#ffc107',
+                        '#28a745'
                     ],
                     borderWidth: 1
                 }]
@@ -131,16 +138,60 @@ document.addEventListener('DOMContentLoaded', function() {
                         position: 'bottom',
                         labels: {
                             padding: 20,
-                            font: {
-                                size: 12
-                            }
+                            font: { size: 12 }
                         }
                     }
                 }
             }
         });
-    } else {
-        console.error('Could not find enrollment chart canvas');
     }
-});
+
+    // Add click event listener to export button
+    document.getElementById('exportButton').addEventListener('click', async function() {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(16);
+            doc.text('Kiddie Day Care Management System', 105, 15, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('Enrollment Statistics Report', 105, 25, { align: 'center' });
+            
+            // Add date
+            doc.setFontSize(10);
+            doc.text('Generated on: ' + new Date().toLocaleString(), 105, 35, { align: 'center' });
+            
+            // Add statistics
+            doc.setFontSize(12);
+            doc.text('Dashboard Statistics:', 20, 45);
+            doc.setFontSize(10);
+            doc.text('Total Services: <?= number_format($stats_row['total_services'] ?? 0) ?>', 25, 55);
+            doc.text('Total Babysitters: <?= number_format($stats_row['total_babysitters']) ?>', 25, 62);
+            doc.text('Pending Enrollments: <?= number_format($stats_row['pending_enrollments']) ?>', 25, 69);
+            doc.text('Confirmed Enrollments: <?= number_format($stats_row['confirmed_enrollments']) ?>', 25, 76);
+            
+            // Convert chart to image
+            const canvas = document.getElementById('enrollmentChart');
+            const chartImage = await html2canvas(canvas);
+            
+            // Add chart image to PDF
+            doc.addImage(
+                chartImage.toDataURL('image/png'),
+                'PNG',
+                20,
+                85,
+                170,
+                100
+            );
+            
+            // Save the PDF
+            doc.save('kiddie-daycare-statistics.pdf');
+            
+        } catch (error) {
+            console.error('PDF Export Error:', error);
+            alert('Error generating PDF. Please check console for details.');
+        }
+    });
+};
 </script> 

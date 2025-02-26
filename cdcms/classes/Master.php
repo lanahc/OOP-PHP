@@ -21,43 +21,76 @@ Class Master extends DBConnection {
 		}
 	}
 	function save_service(){
-		$_POST['description'] = htmlentities($_POST['description']);
-		extract($_POST);
-		$data = "";
-		foreach($_POST as $k =>$v){
-			if(!in_array($k,array('id'))){
-				if(!is_numeric($v))
-					$v = $this->conn->real_escape_string($v);
-				if(!empty($data)) $data .=",";
-				$data .= " `{$k}`='{$v}' ";
+		try {
+			extract($_POST);
+			$data = "";
+			
+			// Handle schedule array
+			if(isset($_POST['schedule']) && is_array($_POST['schedule'])){
+				$_POST['schedule'] = implode(',', $_POST['schedule']);
 			}
-		}
-		if(empty($id)){
-			$sql = "INSERT INTO `service_list` set {$data} ";
-		}else{
-			$sql = "UPDATE `service_list` set {$data} where id = '{$id}' ";
-		}
-		$check = $this->conn->query("SELECT * FROM `service_list` where `name`='{$name}' ".($id > 0 ? " and id != '{$id}'" : ""))->num_rows;
-		if($check > 0){
-			$resp['status'] = 'failed';
-			$resp['msg'] = "Service Name Already Exists.";
-		}else{
-			$save = $this->conn->query($sql);
-			if($save){
-				$rid = !empty($id) ? $id : $this->conn->insert_id;
-				$resp['status'] = 'success';
-				if(empty($id))
-					$resp['msg'] = "Service details successfully added.";
-				else
-					$resp['msg'] = "Service details has been updated successfully.";
+			
+			foreach($_POST as $k => $v){
+				if(!in_array($k, array('id'))){
+					if(!is_numeric($v)) 
+						$v = $this->conn->real_escape_string($v);
+					if(!empty($data)) $data .= ",";
+					$data .= " `{$k}`='{$v}' ";
+				}
+			}
+
+			// Handle file upload if exists
+			if(isset($_FILES['program_image']) && $_FILES['program_image']['tmp_name'] != ''){
+				$upload_path = 'uploads/services/';
+				if(!is_dir(base_app.$upload_path)) {
+					mkdir(base_app.$upload_path, 0777, true);
+				}
+				
+				$ext = pathinfo($_FILES['program_image']['name'], PATHINFO_EXTENSION);
+				$filename = strtotime(date('y-m-d H:i')).'_'.bin2hex(random_bytes(8)).'.'.$ext;
+				$move = move_uploaded_file($_FILES['program_image']['tmp_name'], base_app.$upload_path.$filename);
+				
+				if($move){
+					// Delete old image if exists
+					if(!empty($id)){
+						$old = $this->conn->query("SELECT image_path FROM service_list WHERE id = '{$id}'")->fetch_assoc()['image_path'];
+						if($old && is_file(base_app.$old)) unlink(base_app.$old);
+					}
+					$data .= ", `image_path`='{$upload_path}{$filename}' ";
+				}
+			}
+
+			if(empty($id)){
+				$sql = "INSERT INTO `service_list` set {$data}";
 			}else{
-				$resp['status'] = 'failed';
-				$resp['msg'] = "An error occured.";
-				$resp['err'] = $this->conn->error."[{$sql}]";
+				$sql = "UPDATE `service_list` set {$data} where id = '{$id}'";
 			}
+
+			$check = $this->conn->query("SELECT * FROM `service_list` where `name`='{$name}' ".($id > 0 ? " and id != '{$id}'" : ""))->num_rows;
+			if($check > 0){
+				$resp['status'] = 'failed';
+				$resp['msg'] = "Service Name Already Exists.";
+			}else{
+				$save = $this->conn->query($sql);
+				if($save){
+					$rid = !empty($id) ? $id : $this->conn->insert_id;
+					$resp['status'] = 'success';
+					$resp['msg'] = empty($id) ? "Service details successfully added." : "Service details has been updated successfully.";
+				}else{
+					$resp['status'] = 'failed';
+					$resp['msg'] = "An error occurred while saving to database.";
+					$resp['error'] = $this->conn->error;
+					$resp['sql'] = $sql;
+				}
+			}
+		} catch (Exception $e) {
+			$resp['status'] = 'failed';
+			$resp['msg'] = "An error occurred: " . $e->getMessage();
 		}
-		if($resp['status'] =='success')
-		$this->settings->set_flashdata('success',$resp['msg']);
+		
+		if($resp['status'] == 'success')
+			$this->settings->set_flashdata('success', $resp['msg']);
+		
 		return json_encode($resp);
 	}
 	function delete_service(){
@@ -230,40 +263,49 @@ Class Master extends DBConnection {
 		if($save){
 			$eid = !empty($id) ? $id : $this->conn->insert_id;
 			$resp['status'] = 'success';
-			if(empty($id))
-				$resp['msg'] = "Enrollment Details has successfully submitted. Your Enrollment Code is <b>{$code}</b>.";
-			else
+			if(empty($id)) {
+				$resp['msg'] = "
+					<div class='text-center'>
+						<h4>Enrollment Details Successfully Submitted!</h4>
+						<p>Your Enrollment Code is: <b>{$code}</b></p>
+						<p>Please save this code as you'll need it for booking.</p>
+						<div class='mt-3'>
+							<a href='".base_url."book_babysitter.php' class='btn btn-primary'>Book a Babysitter Now</a>
+						</div>
+					</div>";
+			} else {
 				$resp['msg'] = "Enrollment details has been updated successfully.";
-				$data = "";
-				foreach($_POST as $k =>$v){
-					if(!in_array($k,array('id','code','fullname','status'))){
-						if(!is_numeric($v))
-							$v = $this->conn->real_escape_string($v);
-						if(!empty($data)) $data .=",";
-						$data .= " ('{$eid}', '{$k}', '{$v}')";
-					}
+			}
+			$data = "";
+			foreach($_POST as $k =>$v){
+				if(!in_array($k,array('id','code','fullname','status'))){
+					if(!is_numeric($v))
+						$v = $this->conn->real_escape_string($v);
+					if(!empty($data)) $data .=",";
+					$data .= " ('{$eid}', '{$k}', '{$v}')";
 				}
-				if(!empty($data)){
-					$sql2 = "INSERT INTO `enrollment_details` (`enrollment_id`,`meta_field`,`meta_value`) VALUES {$data}";
-					$this->conn->query("DELETE FROM `enrollment_details` FROM where enrollment_id = '{$eid}'");
-					$save_meta = $this->conn->query($sql2);
-					if($save_meta){
-						$resp['status'] = 'success';
-					}else{
-						$this->conn->query("DELETE FROM `enrollment_list` FROM where id = '{$eid}'");
-						$resp['status'] = 'failed';
-						$resp['msg'] = "An error occurred while saving the data. Error: ".$this->conn->error;
-					}
+			}
+			if(!empty($data)){
+				$sql2 = "INSERT INTO `enrollment_details` (`enrollment_id`,`meta_field`,`meta_value`) VALUES {$data}";
+				$this->conn->query("DELETE FROM `enrollment_details` where enrollment_id = '{$eid}'");
+				$save_meta = $this->conn->query($sql2);
+				if($save_meta){
+					$resp['status'] = 'success';
+				}else{
+					$this->conn->query("DELETE FROM `enrollment_list` where id = '{$eid}'");
+					$resp['status'] = 'failed';
+					$resp['msg'] = "An error occurred while saving the data. Error: ".$this->conn->error;
 				}
+			}
 		}else{
 			$resp['status'] = 'failed';
 			$resp['msg'] = "An error occured.";
 			$resp['err'] = $this->conn->error."[{$sql}]";
 		}
 		if($resp['status'] =='success' && !empty($id))
-		$this->settings->set_flashdata('success',$resp['msg']);
+			$this->settings->set_flashdata('success',$resp['msg']);
 		if($resp['status'] =='success' && empty($id))
-		$this->settings->set_flashdata('pop_msg',$resp['msg']);
+			$this->settings->set_flashdata('pop_msg',$resp['msg']);
 		return json_encode($resp);
 	}
 	function delete_enrollment(){
@@ -346,6 +388,24 @@ public function register_parent()
             'msg' => 'An error occurred: ' . $e->getMessage()
         ]);
     }
+}
+
+// Add this function to handle parent logout
+public function logout_parent(){
+	session_destroy();
+	foreach($_SESSION as $k => $v){
+		unset($_SESSION[$k]);
+	}
+	return json_encode(array('status'=>'success'));
+}
+
+// Add this to check parent login status
+public function check_parent_login(){
+	if(isset($_SESSION['parent_login']) && $_SESSION['parent_login'] == true){
+		return json_encode(array('status'=>'success'));
+	}else{
+		return json_encode(array('status'=>'failed'));
+	}
 }
 }
 

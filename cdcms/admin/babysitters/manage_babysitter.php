@@ -1,4 +1,3 @@
-
 <?php 
 
 if(isset($_GET['id'])){
@@ -36,6 +35,11 @@ if(isset($_GET['id'])){
             </div>
             <div class="card-body">
                 <div class="container-fluid">
+                    <?php if(isset($error_msg)): ?>
+                    <div class="alert alert-danger">
+                        <?= $error_msg ?>
+                    </div>
+                    <?php endif; ?>
                     <form action="" id="babysitter-form">
                         <input type="hidden" name="id" value="<?= isset($id) ? $id : '' ?>">
                         <fieldset>
@@ -43,48 +47,44 @@ if(isset($_GET['id'])){
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     <label for="firstname" class="control-label text-primary">First Name</label>
-                                    <input type="text" autofocus class="form-control form-control-border" name="firstname" id="firstname" required value="<?= isset($firstname) ? $firstname : "" ?>">
+                                    <input type="text" autofocus autocomplete="given-name" class="form-control form-control-border" name="firstname" id="firstname" required value="<?= isset($firstname) ? $firstname : "" ?>">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="middlename" class="control-label text-primary">Middle Name</label>
-                                    <input type="text" class="form-control form-control-border" name="middlename" id="middlename" placeholder="(Optional)..." value="<?= isset($middlename) ? $middlename : "" ?>">
+                                    <input type="text" autocomplete="additional-name" class="form-control form-control-border" name="middlename" id="middlename" placeholder="(Optional)..." value="<?= isset($middlename) ? $middlename : "" ?>">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="lastname" class="control-label text-primary">Last Name</label>
-                                    <input type="text" class="form-control form-control-border" name="lastname" id="lastname" required value="<?= isset($lastname) ? $lastname : "" ?>">
+                                    <input type="text" autocomplete="family-name" class="form-control form-control-border" name="lastname" id="lastname" required value="<?= isset($lastname) ? $lastname : "" ?>">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="form-group col-md-12">
-                                    <label for="" class="control-label text-primary">Gender</label>
-                                </div>
-                                <div class="form-group col-auto">
-                                    <div class="custom-control custom-radio">
+                                    <label class="control-label text-primary">Gender</label>
+                                    <div class="form-check">
                                         <input class="custom-control-input" type="radio" id="genderMale" name="gender" value="Male" required <?= isset($gender) && $gender == "Male" ? "checked" : "" ?>>
-                                        <label for="genderMale" class="custom-control-label">Male</label>
+                                        <label class="custom-control-label" for="genderMale">Male</label>
                                     </div>
-                                </div>
-                                <div class="form-group col-auto">
-                                    <div class="custom-control custom-radio">
+                                    <div class="form-check">
                                         <input class="custom-control-input" type="radio" id="genderFemale" name="gender" value="Female" <?= isset($gender) && $gender == "Female" ? "checked" : "" ?>>
-                                        <label for="genderFemale" class="custom-control-label">Female</label>
+                                        <label class="custom-control-label" for="genderFemale">Female</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     <label for="email" class="control-label text-primary">Email</label>
-                                    <input type="email" class="form-control form-control-border" name="email" id="email" required  value="<?= isset($email) ? $email : "" ?>">
+                                    <input type="email" autocomplete="email" class="form-control form-control-border" name="email" id="email" required value="<?= isset($email) ? $email : "" ?>">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="contact" class="control-label text-primary">Contact #</label>
-                                    <input type="text" class="form-control form-control-border" name="contact" id="contact" required value="<?= isset($contact) ? $contact : "" ?>">
+                                    <input type="text" autocomplete="tel" class="form-control form-control-border" name="contact" id="contact" required value="<?= isset($contact) ? $contact : "" ?>">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="form-group col-md-12">
                                     <label for="address" class="control-label text-primary">Address</label>
-                                    <textarea name="address" id="address" class="form-control form-control-border" rows="2" required><?= isset($address) ? $address : "" ?></textarea>
+                                    <textarea name="address" id="address" autocomplete="street-address" class="form-control form-control-border" rows="2" required><?= isset($address) ? $address : "" ?></textarea>
                                 </div>
                             </div>
                             <div class="row">
@@ -132,7 +132,7 @@ if(isset($_GET['id'])){
                         <hr>
                         <div class="row">
                             <div class="form-group col-md-4">
-                                <label for="" class="control-label">Status</label>
+                                <label for="status" class="control-label">Status</label>
                                 <select name="status" id="status" class="form-control form-control-border" required>
                                     <option value="1" <?= isset($status) && $status == 1 ? "selected" :"" ?>>Active</option>
                                     <option value="0" <?= isset($status) && $status == 0 ? "selected" :"" ?>>Inactive</option>
@@ -170,23 +170,26 @@ if(isset($_GET['id'])){
             var _this = $(this)
             $('.pop-msg').remove()
             var el = $('<div>')
-                el.addClass("pop-msg alert")
-                el.hide()
+            el.addClass("pop-msg alert")
+            el.hide()
             start_loader();
             $.ajax({
                 url:_base_url_+"classes/Master.php?f=save_babysitter",
-				data: new FormData($(this)[0]),
+                data: new FormData($(this)[0]),
                 cache: false,
                 contentType: false,
                 processData: false,
                 method: 'POST',
                 type: 'POST',
                 dataType: 'json',
-				error:err=>{
-					console.log(err)
-					alert_toast("An error occured",'error');
-					end_loader();
-				},
+                error:err=>{
+                    console.log(err)
+                    el.addClass("alert-danger")
+                    el.text("An error occurred: " + err.responseText)
+                    _this.prepend(el)
+                    el.show('slow')
+                    end_loader();
+                },
                 success:function(resp){
                     if(resp.status == 'success'){
                         location.href ="./?page=babysitters";
